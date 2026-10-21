@@ -310,6 +310,23 @@ class Base : public Implements3d<FeatureList<Feature>>
     }
     return inertia;
   }
+
+  public: static void AssignInertialToLink(
+               LinkInfo *_link, const math::Inertiald &_inertial)
+  {
+    // Rebalance the link inertia between the original body node and its
+    // welded mirror nodes
+    std::size_t nodeCount = 1 + _link->weldedNodes.size();
+    _link->inertial = _inertial;
+    const auto dividedInertial = DivideInertial(*_link->inertial, nodeCount);
+    const auto dartInertial = ConvertInertialToDart(dividedInertial);
+    _link->link->setInertia(dartInertial);
+    for (const auto &weldedNodePair : _link->weldedNodes)
+    {
+      weldedNodePair.first->setInertia(dartInertial);
+    }
+  }
+
   public: inline DartBodyNode* SplitAndWeldLink(LinkInfo *_link)
   {
     // First create a new body node with FreeJoint and a unique name based
