@@ -23,6 +23,7 @@
 #include "JointFeatures.hh"
 #include "KinematicsFeatures.hh"
 #include "LinkFeatures.hh"
+#include "LinkInertialFeatures.hh"
 #include "SDFFeatures.hh"
 #include "ShapeFeatures.hh"
 #include "SimulationFeatures.hh"
@@ -44,6 +45,7 @@ struct DartsimFeatures : FeatureList<
   ModelFeatureList,
   KinematicsFeatureList,
   LinkFeatureList,
+  LinkInertialFeatureList,
   SDFFeatureList,
   ShapeFeatureList,
   SimulationFeatureList,
@@ -60,6 +62,7 @@ class Plugin :
     public virtual ModelFeatures,
     public virtual KinematicsFeatures,
     public virtual LinkFeatures,
+    public virtual LinkInertialFeatures,
     public virtual SDFFeatures,
     public virtual ShapeFeatures,
     public virtual SimulationFeatures,
