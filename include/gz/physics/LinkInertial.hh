@@ -18,7 +18,7 @@
 #ifndef GZ_PHYSICS_LINK_INERTIAL_HH_
 #define GZ_PHYSICS_LINK_INERTIAL_HH_
 
-#include <gz/math/Matrix6.hh>
+#include <gz/math/Inertial.hh>
 
 #include <gz/physics/FeatureList.hh>
 
@@ -31,31 +31,31 @@ class LinkInertial: public virtual Feature
   public: template <typename PolicyT, typename FeaturesT>
   class Link : public virtual Feature::Link<PolicyT, FeaturesT>
   {
-    public: void SetInertial(const gz::math::Matrix6d &_inertial);
-    public: gz::math::Matrix6d GetInertial() const;
+    public: void SetInertial(const gz::math::Inertiald &_inertial);
+    public: gz::math::Inertiald GetInertial() const;
   };
 
   public: template <typename PolicyT>
   class Implementation : public virtual Feature::Implementation<PolicyT>
   {
     public: virtual void SetLinkInertial(const Identity &_link,
-                const gz::math::Matrix6d &_inertial) = 0;
-    public: virtual gz::math::Matrix6d GetLinkInertial(
+                const gz::math::Inertiald &_inertial) = 0;
+    public: virtual gz::math::Inertiald GetLinkInertial(
                 const Identity &_link) const = 0;
   };
 };
 
 template <typename PolicyT, typename FeaturesT>
 auto LinkInertial::Link<PolicyT, FeaturesT>::SetInertial(
-    const gz::math::Matrix6d &_inertial) -> void
+    const gz::math::Inertiald &_inertial) -> void
 {
   this->template Interface<LinkInertial>()
     ->SetLinkInertial(this->identity, _inertial);
 }
-template <typename PolicyT, typename FeaturesT>
 
+template <typename PolicyT, typename FeaturesT>
 auto LinkInertial::Link<PolicyT, FeaturesT>::GetInertial(
-) const -> gz::math::Matrix6d
+) const -> gz::math::Inertiald
 {
   return this->template Interface<LinkInertial>()
               ->GetLinkInertial(this->identity);
