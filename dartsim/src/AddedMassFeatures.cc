@@ -34,41 +34,13 @@ void AddedMassFeatures::SetLinkAddedMass(const Identity &_link,
     auto &sdfInertia = linkInfo->inertial.value();
     sdfInertia.SetFluidAddedMass(_addedMass);
 
-    dart::dynamics::Inertia newInertia;
-    newInertia.setMass(sdfInertia.MassMatrix().Mass());
-
-    const Eigen::Matrix3d I_link = math::eigen3::convert(sdfInertia.Moi());
-    newInertia.setMoment(I_link);
-
-    const Eigen::Vector3d localCom =
-        math::eigen3::convert(sdfInertia.Pose().Pos());
-    newInertia.setLocalCOM(localCom);
-
+    dart::dynamics::Inertia newInertia = ConvertInertialToDart(sdfInertia);
+  
     if (sdfInertia.FluidAddedMass().has_value())
     {
-      // Note that the ordering of the spatial inertia matrix used in DART is
-      // different than the one used in Gazebo and SDF.
-      math::Matrix6d featherstoneMatrix;
-      featherstoneMatrix.SetSubmatrix(math::Matrix6d::TOP_LEFT,
-          sdfInertia.FluidAddedMass().value().Submatrix(
-          math::Matrix6d::BOTTOM_RIGHT));
-      featherstoneMatrix.SetSubmatrix(math::Matrix6d::TOP_RIGHT,
-          sdfInertia.FluidAddedMass().value().Submatrix(
-          math::Matrix6d::BOTTOM_LEFT));
-      featherstoneMatrix.SetSubmatrix(math::Matrix6d::BOTTOM_LEFT,
-          sdfInertia.FluidAddedMass().value().Submatrix(
-          math::Matrix6d::TOP_RIGHT));
-      featherstoneMatrix.SetSubmatrix(math::Matrix6d::BOTTOM_RIGHT,
-          sdfInertia.FluidAddedMass().value().Submatrix(
-          math::Matrix6d::TOP_LEFT));
-
       // If using added mass, gravity needs to be applied as a separate
       // force at the center of mass using F=ma;
       bn->setGravityMode(false);
-
-      newInertia.setSpatialTensor(
-          newInertia.getSpatialTensor() +
-          math::eigen3::convert(featherstoneMatrix));
     }
     bn->setInertia(newInertia);
   }
