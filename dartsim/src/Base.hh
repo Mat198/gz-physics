@@ -273,6 +273,43 @@ class Base : public Implements3d<FeatureList<Feature>>
     _body->setLocalCOM(math::eigen3::convert(com));
   }
 
+  protected: static dart::dynamics::Inertia ConvertInertialToDart(
+             const math::Inertiald &_inertial)
+  {
+    dart::dynamics::Inertia inertia;
+    inertia.setMass(_inertial.MassMatrix().Mass());
+
+    const Eigen::Matrix3d I_link = math::eigen3::convert(_inertial.Moi());
+    inertia.setMoment(I_link);
+
+    const Eigen::Vector3d localCom =
+        math::eigen3::convert(_inertial.Pose().Pos());
+    inertia.setLocalCOM(localCom);
+
+    if (_inertial.FluidAddedMass().has_value())
+    {
+      // Note that the ordering of the spatial inertia matrix used in DART is
+      // different than the one used in Gazebo and SDF.
+      math::Matrix6d featherstoneMatrix;
+      featherstoneMatrix.SetSubmatrix(math::Matrix6d::TOP_LEFT,
+          _inertial.FluidAddedMass().value().Submatrix(
+          math::Matrix6d::BOTTOM_RIGHT));
+      featherstoneMatrix.SetSubmatrix(math::Matrix6d::TOP_RIGHT,
+          _inertial.FluidAddedMass().value().Submatrix(
+          math::Matrix6d::BOTTOM_LEFT));
+      featherstoneMatrix.SetSubmatrix(math::Matrix6d::BOTTOM_LEFT,
+          _inertial.FluidAddedMass().value().Submatrix(
+          math::Matrix6d::TOP_RIGHT));
+      featherstoneMatrix.SetSubmatrix(math::Matrix6d::BOTTOM_RIGHT,
+          _inertial.FluidAddedMass().value().Submatrix(
+          math::Matrix6d::TOP_LEFT));
+
+      inertia.setSpatialTensor(
+          inertia.getSpatialTensor() +
+          math::eigen3::convert(featherstoneMatrix));
+    }
+    return inertia;
+  }
   public: inline DartBodyNode* SplitAndWeldLink(LinkInfo *_link)
   {
     // First create a new body node with FreeJoint and a unique name based
