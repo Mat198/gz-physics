@@ -15,6 +15,7 @@ set(tests
   joint_transmitted_wrench_features
   kinematic_features
   link_features
+  link_inertial_features
   model_features
   shape_features
   simulation_features
